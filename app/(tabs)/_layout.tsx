@@ -1,33 +1,91 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Tabs, useRouter } from 'expo-router';
+import { Home, Settings, History, Bell } from 'lucide-react-native';
+import { Platform, Pressable } from 'react-native';
+import MyLogo from '../../assets/logo/o.svg';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const router = useRouter();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        tabBarActiveTintColor: '#E53E3E',
+        tabBarInactiveTintColor: '#A0AEC0',
+        tabBarStyle: {
+          backgroundColor: '#1A202C',
+          borderTopWidth: 0,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 5,
+          height: Platform.OS === 'android' ? 75 : 95,
+          paddingBottom: Platform.OS === 'android' ? 15 : 35,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontFamily: 'Poppins-Regular',
+        },
+
+        // Custom Header Styling
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: '#1A202C',
+          shadowOpacity: 0,
+          elevation: 0,
+          borderBottomWidth: 0,
+        },
+        headerTintColor: '#FFFFFF',
+        headerTitleAlign: 'center',
+        headerTitle: '', // Hapus judul teks default
+
+        // Header Kiri: Logo
+        headerLeft: () => (
+          <Pressable
+            onPress={() => router.push('/(tabs)/home')}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <MyLogo width={40} height={40} style={{ marginLeft: 15 }} />
+          </Pressable>
+        ),
+
+        // Header Kanan: Notifikasi
+        headerRight: () => (
+          <Pressable
+            onPress={() => router.push('/notifications')}
+            style={({ pressed }) => ({
+              marginRight: 15,
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <Bell size={30} color="#FFFFFF" style={{ marginRight: 15 }} />
+          </Pressable>
+        ),
+      }}
+    >
+      {/* Definisi Tab */}
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Beranda',
+          tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="history"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Riwayat',
+          tabBarIcon: ({ color, size }) => <History size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Pengaturan',
+          tabBarIcon: ({ color, size }) => <Settings size={size} color={color} />,
         }}
       />
     </Tabs>
