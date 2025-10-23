@@ -7,9 +7,8 @@ import { AuthProvider, useAuth } from '../context/AuthContext'; // Pastikan path
 // Mencegah splash screen hilang otomatis
 SplashScreen.preventAutoHideAsync();
 
-// Komponen terpisah untuk menggunakan hook useAuth
 function RootLayoutNav() {
-  const { isLoading: isAuthLoading } = useAuth(); // Ambil status loading auth
+  const { isLoading: isAuthLoading } = useAuth(); 
 
   const [fontsLoaded, fontError] = useFonts({
     'Poppins-Regular': require('../assets/fonts/Poppins-Regular.ttf'),
@@ -21,30 +20,40 @@ function RootLayoutNav() {
     if (fontError) throw fontError;
   }, [fontError]);
 
-  // Sembunyikan splash screen setelah font & auth siap
   useEffect(() => {
     if (fontsLoaded && !isAuthLoading) {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, isAuthLoading]);
 
-  // Tampilkan null jika font belum siap ATAU auth masih loading
   if (!fontsLoaded || isAuthLoading) {
     return null;
   }
 
   return (
-      <Stack screenOptions={{ headerShown: false }}>
-        {/* Halaman index (welcome/onboarding) */}
-        <Stack.Screen name="index" />
-        {/* Grup halaman autentikasi (login, forgot, device-id) */}
-        <Stack.Screen name="(auth)" />
-        {/* Grup halaman utama setelah login (home, settings, etc.) */}
-        <Stack.Screen name="(tabs)" />
-      </Stack>
+    <Stack 
+      screenOptions={{ 
+        headerShown: false,
+        animation: 'fade',
+        animationDuration: 200,
+      }}
+    >
+      <Stack.Screen name="index" />
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="(settings)" />
+      
+      <Stack.Screen name="notifications" />
+      <Stack.Screen name="edit-profile" />
+      <Stack.Screen name="add-user" />
+      <Stack.Screen name="profile-details" />
+      <Stack.Screen name="change-password" />
+      <Stack.Screen name="about" />
+      <Stack.Screen name="help" />
+      
+    </Stack>
   );
 }
-
 export default function RootLayout() {
   return (
     <AuthProvider>

@@ -2,24 +2,29 @@ import React from 'react';
 import { Tabs, useRouter } from 'expo-router';
 import { Home, Settings, History, Bell } from 'lucide-react-native';
 import { Platform, Pressable } from 'react-native';
-import MyLogo from '../../assets/logo/o.svg';
+import MyLogo from '../../assets/logo/o.svg'; // Path logo Anda
 
 export default function TabLayout() {
   const router = useRouter();
+  const headerIconColor = '#1F2937'; // abu tua
+  const activeTabColor = '#E43636';   // Warna primary dari config
+  const inactiveTabColor = '#A0AEC0'; // abu muda
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#E53E3E',
-        tabBarInactiveTintColor: '#A0AEC0',
+        // Gunakan variabel untuk warna tab bar
+        tabBarActiveTintColor: activeTabColor,
+        tabBarInactiveTintColor: inactiveTabColor,
         tabBarStyle: {
-          backgroundColor: '#1A202C',
-          borderTopWidth: 0,
+          backgroundColor: '#FFFFFF', // Putih
+          borderTopWidth: 1,
+          borderTopColor: '#E5E7EB',
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          elevation: 5,
+          shadowOffset: { width: 0, height: -1 },
+          shadowOpacity: 0.03,
+          shadowRadius: 2,
+          elevation: 2,
           height: Platform.OS === 'android' ? 75 : 95,
           paddingBottom: Platform.OS === 'android' ? 15 : 35,
         },
@@ -28,40 +33,33 @@ export default function TabLayout() {
           fontFamily: 'Poppins-Regular',
         },
 
-        // Custom Header Styling
+        // Header Styling
         headerShown: true,
         headerStyle: {
-          backgroundColor: '#1A202C',
-          shadowOpacity: 0,
-          elevation: 0,
-          borderBottomWidth: 0,
+          backgroundColor: '#FFFFFF', // Putih
+          shadowOpacity: 0.05,
+          elevation: 2,
+          borderBottomWidth: Platform.OS === 'android' ? 0 : 1,
+          borderBottomColor: '#E5E7EB',
         },
-        headerTintColor: '#FFFFFF',
+        // Gunakan variabel untuk warna header
+        headerTintColor: headerIconColor,
         headerTitleAlign: 'center',
-        headerTitle: '', // Hapus judul teks default
-
-        // Header Kiri: Logo
+        headerTitle: '',
         headerLeft: () => (
           <Pressable
             onPress={() => router.push('/(tabs)/home')}
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.7 : 1,
-            })}
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
-            <MyLogo width={40} height={40} style={{ marginLeft: 15 }} />
+            <MyLogo width={30} height={30} style={{ marginLeft: 15 }} />
           </Pressable>
         ),
-
-        // Header Kanan: Notifikasi
         headerRight: () => (
           <Pressable
             onPress={() => router.push('/notifications')}
-            style={({ pressed }) => ({
-              marginRight: 15,
-              opacity: pressed ? 0.7 : 1,
-            })}
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1, })}
           >
-            <Bell size={30} color="#FFFFFF" style={{ marginRight: 15 }} />
+            <Bell size={30} color={headerIconColor} style={{ marginRight: 15 }} />
           </Pressable>
         ),
       }}

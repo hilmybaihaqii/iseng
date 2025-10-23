@@ -7,9 +7,10 @@
     "icon": "./assets/images/icon.png",
     "scheme": "collab",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": true, // Note: newArchEnabled might have compatibility issues with some libraries. Ensure all your dependencies support it.
     "ios": {
       "supportsTablet": true
+      // You might need to add "infoPlist" for permissions if not using plugins
     },
     "android": {
       "adaptiveIcon": {
@@ -40,7 +41,16 @@
         }
       ],
       "expo-font",
-      "expo-video"
+      "expo-video",
+
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Izinkan $(PRODUCT_NAME) mengakses galeri foto Anda untuk memilih gambar profil.",
+          "cameraPermission": "Izinkan $(PRODUCT_NAME) mengakses kamera Anda untuk mengambil gambar profil."
+        }
+      ]
+
     ],
     "experiments": {
       "typedRoutes": true,
