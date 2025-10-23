@@ -115,7 +115,8 @@ const LoginScreen = () => {
         user: {
           id: '123',
           name: 'Hilmy',
-          role: 'superuser' as 'superuser' | 'user', // Change role for testing if needed
+          role: 'superuser' as 'superuser' | 'user', // Change role for testing if needed 
+          email: 'hilmy@example.com'
         },
         token: 'xyz...'
       };
