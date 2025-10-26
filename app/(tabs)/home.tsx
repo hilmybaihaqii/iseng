@@ -1,55 +1,82 @@
-import { View, Text, Pressable, ScrollView } from 'react-native';
-import React, { useEffect } from 'react'; // Import useEffect for logging
+import React, { useEffect } from 'react';
+import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LogOut } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
+import { Lightbulb } from 'lucide-react-native';
 import "../../global.css";
 
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withTiming, 
+  withDelay,
+  Easing 
+} from 'react-native-reanimated';
+
+// Impor komponen kita
+import DeviceCard from '../../components/home/DeviceCard'; 
+import WelcomeCard from '../../components/home/WelcomeCard';
+// GANTI NAMA IMPOR INI:
+import DateTimeInfo from '../../components/home/DateTimeInfo'; 
+
 export default function HomeScreen() {
-  // Get user and logout from context
-  const { user, logout } = useAuth();
+  const router = useRouter();
+  const { user } = useAuth();
+  const userName = user?.name || 'Pengguna';
 
-  // Add a log here to check if 'logout' is a function when the component mounts/re-renders
-  useEffect(() => {
-    console.log('[Home Screen] Is logout a function?', typeof logout);
-  }, [logout]); // Dependency array ensures this runs if 'logout' reference changes
-
-  // Simplified handleLogout - Directly call the context function
-  const handleLogout = () => {
-    console.log("Logout button pressed. Attempting to call context logout...");
-    if (typeof logout === 'function') {
-        logout(); // Directly call the function from context
-    } else {
-        console.error("!!! Logout function from context is not available or not a function!");
-    }
+  const goToLightControl = () => {
+    router.push('/light-control'); 
   };
 
+  // --- Setup Animasi (Tidak berubah, sudah benar) ---
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(30);
+
+  const animationStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+      transform: [{ translateY: translateY.value }],
+    };
+  });
+
+  useEffect(() => {
+    opacity.value = withDelay(100, withTiming(1, { duration: 600, easing: Easing.out(Easing.ease) }));
+    translateY.value = withDelay(100, withTiming(0, { duration: 600, easing: Easing.out(Easing.ease) }));
+  }, [opacity, translateY]); 
+  // --- Akhir Setup Animasi ---
+
   return (
-    <SafeAreaView className="flex-1 bg-black">
-      <ScrollView>
-        <View className="p-6">
-          <Text className="text-white text-4xl font-poppins-bold mb-2">
-            Beranda
-          </Text>
-          <Text className="text-gray-300 text-lg font-poppins-regular mb-10">
-            Selamat datang, {user?.name || 'Pengguna'}! ({user?.role})
-          </Text>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <ScrollView contentContainerStyle={{ paddingBottom: 48 }}>
+        
+        <Animated.View style={animationStyle}>
 
-          <Pressable onPress={handleLogout}> 
-            {({ pressed }) => (
-              <View
-                className={`w-full p-4 rounded-xl bg-red-600 flex-row justify-center items-center space-x-2
-                            ${pressed ? 'opacity-80' : 'opacity-100'}`}
-              >
-                <LogOut size={20} color="#FFFFFF" />
-                <Text className="text-white text-xl font-poppins-semibold">
-                  KELUAR
-                </Text>
-              </View>
-            )}
-          </Pressable>
+          {/* === PERUBAHAN URUTAN DI SINI === */}
 
-        </View>
+          {/* 1. Welcome Card (Sekarang paling atas) */}
+          <WelcomeCard name={userName} /> 
+
+          {/* 2. Info Tanggal & Waktu (Di bawah Welcome Card) */}
+          <DateTimeInfo />
+
+          {/* 3. Kontrol Cepat (Beri margin atas agar tidak menempel) */}
+          <View className="px-6 mt-6"> 
+            <Text className="text-xl font-poppins-semibold text-gray-900 mb-4">
+              Kontrol Cepat
+            </Text>
+
+            <View className="gap-y-3">
+              <DeviceCard
+                name="Kontrol Lampu"
+                description="Kelola semua jadwal lampu"
+                icon={<Lightbulb />}
+                onPress={goToLightControl}
+              />
+            </View>
+          </View>
+
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );

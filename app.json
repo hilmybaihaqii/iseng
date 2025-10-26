@@ -40,7 +40,15 @@
         }
       ],
       "expo-font",
-      "expo-video"
+      "expo-video",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Izinkan $(PRODUCT_NAME) mengakses galeri foto Anda untuk memilih gambar profil.",
+          "cameraPermission": "Izinkan $(PRODUCT_NAME) mengakses kamera Anda untuk mengambil gambar profil."
+        }
+      ],
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true,

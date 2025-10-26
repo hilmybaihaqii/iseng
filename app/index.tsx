@@ -4,18 +4,18 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  NativeScrollEvent, 
+  NativeScrollEvent,
 } from 'react-native';
-import { router } from 'expo-router'; 
+import { router } from 'expo-router';
 import { ArrowRight } from 'lucide-react-native';
-import { Video, ResizeMode } from 'expo-av';
-import React, { createRef, useState } from 'react';
-import "../global.css";
 
-// INI SUDAH BENAR
-import MyLogo from '../assets/logo/full.svg'; 
+import { VideoView, useVideoPlayer } from 'expo-video';
+import React, { createRef, useState, useEffect } from 'react';
+import '../global.css';
 
-const videoSource = require('../assets/video/welcome.mp4'); 
+import MyLogo from '../assets/logo/full.svg';
+
+const videoSource = require('../assets/video/welcome.mp4');
 
 const slides = [
   {
@@ -33,38 +33,36 @@ const slides = [
 ];
 
 const WelcomeScreen = () => {
-  const videoRef = createRef<Video>(); 
-  
+  const videoRef = createRef<VideoView>();
+  const player = useVideoPlayer(videoSource);
   const [activeIndex, setActiveIndex] = useState(0);
   const [scrollContainerWidth, setScrollContainerWidth] = useState(0);
+
+  useEffect(() => {
+    if (player) {
+      player.play();
+      player.loop = true;
+      player.muted = true;
+    }
+  }, [player]);
 
   const handleScroll = (event: NativeScrollEvent) => {
     if (scrollContainerWidth === 0) return;
     const index = Math.round(event.contentOffset.x / scrollContainerWidth);
     setActiveIndex(index);
   };
-  
+
   return (
     <View style={StyleSheet.absoluteFillObject}>
-      
-      {/* Video Latar Belakang */}
-      <Video
+      <VideoView
         ref={videoRef}
-        style={StyleSheet.absoluteFillObject} 
-        source={videoSource}
-        shouldPlay={true}
-        isLooping={true}
-        isMuted={true}
-        resizeMode={ResizeMode.COVER} 
+        style={StyleSheet.absoluteFillObject}
+        player={player}
+        contentFit="cover"
       />
+      <View className="bg-black/50" style={StyleSheet.absoluteFillObject} />
 
-      {/* Overlay Gelap untuk Kontras */}
-      <View className="bg-black/50" style={StyleSheet.absoluteFillObject} /> 
-      
-      {/* Konten Onboarding */}
-      <View className="flex-1 justify-between items-center px-8 pb-16 pt-20"> 
-        
-        {/* INI JUGA SUDAH BENAR */}
+      <View className="flex-1 justify-between items-center px-8 pb-16 pt-20">
         <View className="w-full items-start">
           <MyLogo width={130} height={50} />
         </View>
@@ -85,7 +83,7 @@ const WelcomeScreen = () => {
             {slides.map((slide) => (
               <View
                 key={slide.key}
-                style={{ width: scrollContainerWidth, height: 160 }} 
+                style={{ width: scrollContainerWidth, height: 160 }}
                 className="justify-center"
               >
                 <Text className="text-white text-5xl font-poppins-bold mb-4">
@@ -95,7 +93,6 @@ const WelcomeScreen = () => {
             ))}
           </ScrollView>
 
-          {/* Indikator Dot (Dinamis) */}
           <View className="flex-row mt-4">
             {slides.map((_, index) => (
               <View
@@ -108,12 +105,12 @@ const WelcomeScreen = () => {
           </View>
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           className="w-20 h-20 rounded-full mb-10 bg-white justify-center items-center shadow-xl"
           activeOpacity={0.7}
           onPress={() => router.push('/(auth)/login')}
-        > 
-          <ArrowRight size={30} color="#000000" /> 
+        >
+          <ArrowRight size={30} color="#000000" />
         </TouchableOpacity>
       </View>
     </View>

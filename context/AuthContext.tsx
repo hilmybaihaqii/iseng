@@ -3,10 +3,12 @@ import { useRouter, useSegments } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // --- Types ---
-interface User {
+export interface User {
   id: string;
   name: string;
   role: 'superuser' | 'user';
+  email?: string;
+  profilePicUrl?: string;
 }
 
 interface AuthContextType {
@@ -16,6 +18,7 @@ interface AuthContextType {
   login: (userData: User, token: string) => Promise<void>;
   logout: () => Promise<void>;
   setDeviceIdComplete: () => Promise<void>;
+  updateUserData: (updatedData: Partial<User>) => Promise<void>;
 }
 
 // --- Context Definition ---
@@ -30,10 +33,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const segments = useSegments();
 
-  // Initial Auth Status Check
+  // Initial Auth Status Check (Revised Logic)
   useEffect(() => {
     const checkAuthStatus = async () => {
-      setIsLoading(true); // Ensure loading starts
+      setIsLoading(true);
+      let needsDeviceId = false; // Default to false
       try {
         const storedToken = await AsyncStorage.getItem('userToken');
         const storedUser = await AsyncStorage.getItem('userData');
@@ -43,23 +47,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const parsedUser: User = JSON.parse(storedUser);
           setUser(parsedUser);
           setToken(storedToken);
+
+          // Set needsDeviceId ONLY if superuser AND status is not 'true'
           if (parsedUser.role === 'superuser' && deviceIdStatus !== 'true') {
-            setIsDeviceIdNeeded(true);
-          } else {
-            setIsDeviceIdNeeded(false);
+            needsDeviceId = true;
           }
+          // Otherwise, it remains false (default)
         } else {
+          // Ensure states are reset if no user/token found
           setUser(null);
           setToken(null);
-          setIsDeviceIdNeeded(false);
+          needsDeviceId = false;
         }
       } catch (e) {
         console.error("AuthContext: Failed to load auth status:", e);
-        // Ensure states are reset on error
         setUser(null);
         setToken(null);
-        setIsDeviceIdNeeded(false);
+        needsDeviceId = false; // Ensure false on error
       } finally {
+        setIsDeviceIdNeeded(needsDeviceId); // Set state ONCE at the end
         setIsLoading(false);
       }
     };
@@ -68,66 +74,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Route Protection Effect
   useEffect(() => {
-    // Skip logic until initial loading is complete
     if (isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
-    const currentRoute = segments.join('/') || 'index'; // Handle root index case ('/')
+    const currentRoute = segments.join('/') || 'index';
 
-    // User NOT logged in:
     if (!user) {
-      // If not in auth group AND not already on the index/welcome screen, redirect to login
       if (!inAuthGroup && currentRoute !== 'index') {
         router.replace('/(auth)/login');
       }
-    }
-    // User IS logged in:
-    else {
-      // If superuser needs device ID AND is not on the device ID screen
+    } else {
       if (isDeviceIdNeeded && currentRoute !== '(auth)/device-id') {
         router.replace('/(auth)/device-id');
-      }
-      // If logged in, device ID not needed, BUT still in the auth group (e.g., login, device-id)
-      else if (!isDeviceIdNeeded && inAuthGroup) {
+      } else if (!isDeviceIdNeeded && inAuthGroup) {
         router.replace('/(tabs)/home');
       }
     }
-    // No explicit 'else' needed here, as no action is required if conditions aren't met
-
-  }, [user, isDeviceIdNeeded, segments, isLoading, router]); // Dependencies trigger re-evaluation
+  }, [user, isDeviceIdNeeded, segments, isLoading, router]);
 
   // --- Context Functions ---
   const login = async (userData: User, userToken: string) => {
     try {
-      // Set user state first, which will trigger useEffect
       setUser(userData);
       setToken(userToken);
+      // Determine device ID need based ONLY on the freshly logged-in user's role
       if (userData.role === 'superuser') {
         setIsDeviceIdNeeded(true);
       } else {
         setIsDeviceIdNeeded(false);
       }
-      // Persist data after setting state
+      // Persist data and reset device ID status for the new session
       await AsyncStorage.setItem('userToken', userToken);
       await AsyncStorage.setItem('userData', JSON.stringify(userData));
-      await AsyncStorage.removeItem('deviceIdComplete'); // Reset on new login
+      await AsyncStorage.removeItem('deviceIdComplete');
     } catch (e) {
       console.error("AuthContext: Failed to save auth data during login:", e);
-       // Reset state on error? Consider adding setUser(null), setToken(null) here
+      setUser(null);
+      setToken(null);
+      setIsDeviceIdNeeded(false);
     }
   };
 
   const logout = async () => {
     try {
-      // Set user state to null first, which will trigger useEffect
       setUser(null);
       setToken(null);
       setIsDeviceIdNeeded(false);
-      // Clear persisted data
       await AsyncStorage.removeItem('userToken');
       await AsyncStorage.removeItem('userData');
       await AsyncStorage.removeItem('deviceIdComplete');
-      // Explicitly redirect to Welcome screen AFTER clearing data
       router.replace('/');
     } catch (e) {
       console.error("AuthContext: Failed to clear auth data during logout:", e);
@@ -136,18 +131,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const setDeviceIdComplete = async () => {
     try {
-      // Set state first, which will trigger useEffect
+      // Update state first
       setIsDeviceIdNeeded(false);
-      // Persist the completion status
+      // Then persist the status
       await AsyncStorage.setItem('deviceIdComplete', 'true');
     } catch (e) {
       console.error("AuthContext: Failed to set device ID status:", e);
     }
   };
 
+  const updateUserData = async (updatedData: Partial<User>) => {
+    if (!user) return; // Only update if user is logged in
+    try {
+      const newUser = { ...user, ...updatedData };
+      setUser(newUser); // Update context state
+      // Update storage without touching token or deviceIdComplete
+      await AsyncStorage.setItem('userData', JSON.stringify(newUser));
+      console.log("AuthContext: User data updated.");
+    } catch (e) {
+       console.error("AuthContext: Failed to update user data:", e);
+    }
+  };
+
   // --- Provider Value ---
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout, setDeviceIdComplete }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, logout, setDeviceIdComplete, updateUserData }}>
       {children}
     </AuthContext.Provider>
   );
