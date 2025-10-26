@@ -8,16 +8,16 @@ import {
   TextInputProps,
   StyleSheet,
 } from 'react-native';
-import { Link, useRouter } from 'expo-router'; // Use useRouter hook
-import React, { useState, createRef } from 'react';
+import { Link, useRouter } from 'expo-router';
+import React, { useState, createRef, useEffect } from 'react';
 import { MotiView, MotiText, useAnimationState } from 'moti';
 import { Check, Mail, Lock, Eye, EyeOff, LucideIcon } from 'lucide-react-native';
-import { Video, ResizeMode } from 'expo-av'; // Keep expo-av
+import { VideoView, useVideoPlayer } from 'expo-video';
 import { BlurView } from 'expo-blur';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '../../context/AuthContext'; // Import useAuth hook
+import { useAuth } from '../../context/AuthContext';
 
-import MyLogo from '../../assets/logo/full.svg'; // Import SVG logo
+import MyLogo from '../../assets/logo/full.svg';
 const loginVideoSource = require('../../assets/video/welcome.mp4');
 
 const motiTransition = (delay = 0) =>
@@ -49,13 +49,11 @@ const AuthInput = ({
   return (
     <View
       className={`w-full flex-row items-center rounded-xl bg-white/30 border border-white/50
-                 focus-within:border-white focus-within:ring-1 focus-within:ring-white
-                 ${className || ''}`}
+            focus-within:border-white focus-within:ring-1 focus-within:ring-white
+            ${className || ''}`}
     >
-      {/* Using inline style for icon margin */}
       <Icon size={20} color="#FFFFFF" style={{ marginLeft: 20 }} />
       <TextInput
-        // Keep padding consistent with inline icon style
         className="flex-1 pl-5 pr-4 py-4 text-lg text-white font-poppins-regular"
         placeholder={placeholder}
         placeholderTextColor="#E0E0E0"
@@ -93,8 +91,17 @@ const LoginScreen = () => {
     from: { opacity: 0, translateY: 100 },
     to: { opacity: 1, translateY: 0 },
   });
-  const videoRef = createRef<Video>();
-  const router = useRouter(); // Initialize useRouter hook
+  const videoRef = createRef<VideoView>();
+  const router = useRouter();
+  const player = useVideoPlayer(loginVideoSource);
+
+  useEffect(() => {
+    if (player) {
+      player.play();
+      player.loop = true;
+      player.muted = true;
+    }
+  }, [player]);
 
   const handleLogin = async () => {
     if (localIsLoading) return;
@@ -108,41 +115,35 @@ const LoginScreen = () => {
     }
 
     try {
-      // --- SIMULASI BACKEND LOGIN ---
       await new Promise((resolve) => setTimeout(resolve, 1500));
       const backendResponse = {
         success: true,
         user: {
           id: '123',
           name: 'Hilmy',
-          role: 'superuser' as 'superuser' | 'user', // Change role for testing if needed 
+          role: 'superuser' as 'superuser' | 'user',
           email: 'hilmy@example.com'
         },
         token: 'xyz...'
       };
-      // --- AKHIR SIMULASI ---
 
       await login(backendResponse.user, backendResponse.token);
-      // Navigation handled by AuthContext useEffect
 
     } catch (apiError) {
       console.error(apiError);
       setError('Email atau Kata Sandi salah. Coba lagi.');
-      setLocalIsLoading(false); // Stop local loading on error
+      setLocalIsLoading(false);
     }
   };
 
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      <Video
+      <VideoView
         ref={videoRef}
         style={StyleSheet.absoluteFillObject}
-        source={loginVideoSource}
-        shouldPlay={true}
-        isLooping={true}
-        isMuted={true}
-        resizeMode={ResizeMode.COVER} // Keep expo-av
+        player={player}
+        contentFit="cover"
       />
       <View className="bg-black/50" style={StyleSheet.absoluteFillObject} />
 
@@ -224,7 +225,7 @@ const LoginScreen = () => {
                 className="text-red-400 font-poppins-regular text-sm mt-4 text-center"
               >
                 {error}
-              </MotiText>
+              </MotiText> 
             )}
 
             <MotiView
@@ -240,7 +241,7 @@ const LoginScreen = () => {
               >
                 <View
                   className={`w-5 h-5 rounded-md border-2 items-center justify-center
-                            ${rememberMe ? 'bg-red-600 border-red-600' : 'border-white/50 bg-white/20'}`}
+                          ${rememberMe ? 'bg-red-600 border-red-600' : 'border-white/50 bg-white/20'}`}
                 >
                   {rememberMe && <Check size={14} color="#FFFFFF" />}
                 </View>
@@ -288,7 +289,6 @@ const LoginScreen = () => {
               </Pressable>
             </MotiView>
 
-            {/* Conditional Back Button */}
             {router.canGoBack() && (
               <MotiView
                 from={{ opacity: 0 }}

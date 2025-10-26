@@ -129,7 +129,7 @@ export default function HelpScreen() {
           className="mt-8 items-center"
         >
           <Text className="text-gray-500 font-poppins-regular text-center text-sm">
-              Tidak menemukan jawaban? Hubungi kami di <Text className="text-primary font-poppins-medium">support@dmouv.com</Text>
+              Tidak menemukan jawaban? Hubungi kami di <Text className="text-primary font-poppins-medium">cpslaboratory.com</Text>
           </Text>
         </MotiView>
 

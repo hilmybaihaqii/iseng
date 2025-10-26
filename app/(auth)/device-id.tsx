@@ -8,16 +8,18 @@ import {
   TextInputProps,
   StyleSheet,
 } from 'react-native';
-import { router } from 'expo-router'; // Import router for back button
-import React, { useState, createRef } from 'react';
+import { router } from 'expo-router';
+import React, { useState, createRef, useEffect } from 'react'; 
 import { MotiView, MotiText, useAnimationState } from 'moti';
 import { Smartphone, LucideIcon } from 'lucide-react-native';
-import { Video, ResizeMode } from 'expo-av'; // Keep expo-av
+
+// Impor 'expo-video' baru
+import { VideoView, useVideoPlayer } from 'expo-video';
 import { BlurView } from 'expo-blur';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 
-import MyLogo from '../../assets/logo/full.svg'; // Import Logo
+import MyLogo from '../../assets/logo/full.svg';
 const videoSource = require('../../assets/video/welcome.mp4');
 
 const motiTransition = (delay = 0) =>
@@ -69,7 +71,17 @@ const DeviceIdScreen = () => {
     from: { opacity: 0, translateY: 100 },
     to: { opacity: 1, translateY: 0 },
   });
-  const videoRef = createRef<Video>();
+  
+  const videoRef = createRef<VideoView>();
+  const player = useVideoPlayer(videoSource);
+
+  useEffect(() => {
+    if (player) {
+      player.play();
+      player.loop = true;
+      player.muted = true;
+    }
+  }, [player]);
 
   const handleSubmitDeviceId = async () => {
     if (localIsLoading) return;
@@ -96,14 +108,11 @@ const DeviceIdScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      <Video
+      <VideoView
         ref={videoRef}
         style={StyleSheet.absoluteFillObject}
-        source={videoSource}
-        shouldPlay={true}
-        isLooping={true}
-        isMuted={true}
-        resizeMode={ResizeMode.COVER} // Keep expo-av
+        player={player}
+        contentFit="cover"
       />
       <View className="bg-black/50" style={StyleSheet.absoluteFillObject} />
 
@@ -127,7 +136,6 @@ const DeviceIdScreen = () => {
             tint="dark"
             className="w-full p-6 rounded-3xl overflow-hidden"
           >
-            {/* Logo Added Here */}
             <MotiView
               from={{ opacity: 0, translateY: -20 }}
               animate={{ opacity: 1, translateY: 0 }}
@@ -140,7 +148,7 @@ const DeviceIdScreen = () => {
             <MotiText
               from={{ opacity: 0, translateY: -20 }}
               animate={{ opacity: 1, translateY: 0 }}
-              transition={motiTransition(300)} // Adjusted delay
+              transition={motiTransition(300)}
               className="text-4xl font-poppins-bold text-white mb-3 leading-tight text-center"
             >
               Masukkan Device ID
@@ -148,7 +156,7 @@ const DeviceIdScreen = () => {
             <MotiText
               from={{ opacity: 0, translateY: -20 }}
               animate={{ opacity: 1, translateY: 0 }}
-              transition={motiTransition(400)} // Adjusted delay
+              transition={motiTransition(400)}
               className="text-base font-poppins-regular text-gray-200 mb-10 text-center"
             >
               Sebagai Super User, silakan masukkan ID perangkat Anda.
@@ -157,7 +165,7 @@ const DeviceIdScreen = () => {
             <MotiView
               from={{ opacity: 0, translateY: 20 }}
               animate={{ opacity: 1, translateY: 0 }}
-              transition={motiTransition(500)} // Adjusted delay
+              transition={motiTransition(500)}
               className="w-full"
             >
               <DeviceIdInput
@@ -191,7 +199,7 @@ const DeviceIdScreen = () => {
                     animate={{ scale: pressed ? 0.98 : 1 }}
                     transition={{ type: 'timing', duration: 100 }}
                     className={`w-full p-4 rounded-xl items-center shadow-lg bg-red-600 flex-row justify-center space-x-2
-                                  ${localIsLoading ? 'opacity-70' : 'opacity-100'}`}
+                            ${localIsLoading ? 'opacity-70' : 'opacity-100'}`}
                   >
                     {localIsLoading && (
                       <ActivityIndicator size="small" color="#FFFFFF" />
@@ -204,11 +212,10 @@ const DeviceIdScreen = () => {
               </Pressable>
             </MotiView>
 
-            {/* Back Button Added Here */}
             <MotiView
               from={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={motiTransition(700)} // Adjusted delay
+              transition={motiTransition(700)}
               className="items-center mt-6"
             >
               <Pressable onPress={() => router.back()}>
@@ -226,11 +233,11 @@ const DeviceIdScreen = () => {
         </MotiView>
       </ScrollView>
 
-       <View className="w-full items-center px-4 py-6 bg-transparent absolute bottom-0">
-         <Text className="text-white text-sm font-poppins-regular">
-           © D&apos;mouv {new Date().getFullYear()}
-         </Text>
-       </View>
+      <View className="w-full items-center px-4 py-6 bg-transparent absolute bottom-0">
+        <Text className="text-white text-sm font-poppins-regular">
+          © D&apos;mouv {new Date().getFullYear()}
+        </Text>
+      </View>
     </SafeAreaView>
   );
 };
