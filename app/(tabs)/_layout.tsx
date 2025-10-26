@@ -2,24 +2,29 @@ import React from 'react';
 import { Tabs, useRouter } from 'expo-router';
 import { Home, Settings, History, Bell } from 'lucide-react-native';
 import { Platform, Pressable } from 'react-native';
-import MyLogo from '../../assets/logo/o.svg'; // Path logo Anda
+import MyLogo from '../../assets/logo/o.svg';
+
+const COLORS = {
+  primary: '#E43636',
+  headerIcon: '#1F2937',
+  tabActive: '#E43636',
+  tabInactive: '#A0AEC0',
+  white: '#FFFFFF',
+  border: '#E5E7EB',
+};
 
 export default function TabLayout() {
   const router = useRouter();
-  const headerIconColor = '#1F2937'; // abu tua
-  const activeTabColor = '#E43636';   // Warna primary dari config
-  const inactiveTabColor = '#A0AEC0'; // abu muda
 
   return (
     <Tabs
       screenOptions={{
-        // Gunakan variabel untuk warna tab bar
-        tabBarActiveTintColor: activeTabColor,
-        tabBarInactiveTintColor: inactiveTabColor,
+        tabBarActiveTintColor: COLORS.tabActive,
+        tabBarInactiveTintColor: COLORS.tabInactive,
         tabBarStyle: {
-          backgroundColor: '#FFFFFF', // Putih
+          backgroundColor: COLORS.white,
           borderTopWidth: 1,
-          borderTopColor: '#E5E7EB',
+          borderTopColor: COLORS.border,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -1 },
           shadowOpacity: 0.03,
@@ -33,18 +38,15 @@ export default function TabLayout() {
           fontFamily: 'Poppins-Regular',
         },
 
-        // Header Styling
         headerShown: true,
         headerStyle: {
-          backgroundColor: '#FFFFFF', // Putih
+          backgroundColor: COLORS.white,
           shadowOpacity: 0.05,
           elevation: 2,
           borderBottomWidth: Platform.OS === 'android' ? 0 : 1,
-          borderBottomColor: '#E5E7EB',
+          borderBottomColor: COLORS.border,
         },
-        // Gunakan variabel untuk warna header
-        headerTintColor: headerIconColor,
-        headerTitleAlign: 'center',
+        headerTintColor: COLORS.headerIcon,
         headerTitle: '',
         headerLeft: () => (
           <Pressable
@@ -57,32 +59,32 @@ export default function TabLayout() {
         headerRight: () => (
           <Pressable
             onPress={() => router.push('/notifications')}
-            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1, })}
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
-            <Bell size={30} color={headerIconColor} style={{ marginRight: 15 }} />
+            <Bell size={30} color={COLORS.headerIcon} style={{ marginRight: 15 }} />
           </Pressable>
         ),
       }}
     >
-      {/* Definisi Tab */}
+
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Beranda',
+          tabBarLabel: 'Beranda',
           tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
-          title: 'Riwayat',
+          tabBarLabel: 'Riwayat',
           tabBarIcon: ({ color, size }) => <History size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Pengaturan',
+          tabBarLabel: 'Pengaturan',
           tabBarIcon: ({ color, size }) => <Settings size={size} color={color} />,
         }}
       />

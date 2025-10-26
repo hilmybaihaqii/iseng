@@ -2,9 +2,10 @@ import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { AuthProvider, useAuth } from '../context/AuthContext'; // Pastikan path ini benar
+import { AuthProvider, useAuth } from '../context/AuthContext';
 
-// Mencegah splash screen hilang otomatis
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
@@ -14,6 +15,11 @@ function RootLayoutNav() {
     'Poppins-Regular': require('../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
     'Poppins-SemiBold': require('../assets/fonts/Poppins-SemiBold.ttf'),
+    'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
+    'Poppins-ExtraLight': require('../assets/fonts/Poppins-ExtraLight.ttf'),
+    'Roboto-Regular': require('../assets/fonts/Roboto-Regular.ttf'),
+    'Roboto-Medium': require('../assets/fonts/Roboto-Medium.ttf'),
+    'Roboto-SemiBoldItalic': require('../assets/fonts/Roboto-SemiBoldItalic.ttf'),
   });
 
   useEffect(() => {
@@ -42,22 +48,18 @@ function RootLayoutNav() {
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="(settings)" />
-      
       <Stack.Screen name="notifications" />
-      <Stack.Screen name="edit-profile" />
-      <Stack.Screen name="add-user" />
-      <Stack.Screen name="profile-details" />
-      <Stack.Screen name="change-password" />
-      <Stack.Screen name="about" />
-      <Stack.Screen name="help" />
-      
+      <Stack.Screen name="light-control" />
     </Stack>
   );
 }
+
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <RootLayoutNav />
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }
